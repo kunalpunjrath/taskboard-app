@@ -1,0 +1,19 @@
+# import User, Board, List, Card, BoardOrderByInput from "./generated/prisma.graphql"
+
+type Query {
+  allUsers: [User!]!
+  dashboard(userId: ID!, orderBy: BoardOrderByInput): [Board!]!
+  boardDetails(boardId: ID!): Board
+}
+
+type Mutation {
+  createUser(name:String!, email:String!): User
+  createBoard(title:String!, userId:ID!): Board
+  updateBoard(boardId:ID!, title:String): Board
+  createList(title:String!, boardId:ID!): List
+  updateList(listId:ID!, title:String): List
+  createCard(listId:ID!, title:String!, description: String): Card
+  updateCard(cardId:ID!, title:String, description:String, status:String, dueDate:DateTime): Card
+  deleteCard(cardId:ID!): Card
+  # updateCardPositions(cards:[{id:ID!, newIndex:Int!}]): [Card]
+}

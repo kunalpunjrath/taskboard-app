@@ -1,0 +1,35 @@
+type Card {
+  id: ID! @unique
+  title: String!
+  description: String
+  createdAt: DateTime!
+  dueDate: DateTime
+  status: String
+  list: List!
+}
+
+type List {
+  id: ID! @unique
+  title: String!
+  createdAt: DateTime!
+  positionIndex: Int!
+  cardPositionIndexes: [Int!]!
+  board: Board!
+  cards: [Card!]!
+}
+
+type Board {
+  id: ID! @unique
+  title: String!
+  createdAt: DateTime!
+  positionIndex: Int!
+  owner: User!
+  lists: [List!]!
+}
+
+type User {
+  id: ID! @unique
+  name: String!
+  email: String! @unique
+  boards: [Board!]!
+}
