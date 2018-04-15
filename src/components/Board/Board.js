@@ -9,25 +9,35 @@ import * as ListsActions from '../../actions/lists'
 
 import CardsContainer from './Cards/CardsContainer'
 import CustomDragLayer from './CustomDragLayer'
+import { Button } from 'material-ui'
+import { AddIcon } from 'material-ui-icons/Add'
+import { compose, graphql } from 'react-apollo'
+import gql from 'graphql-tag'
+import { withStyles } from 'material-ui'
 
-function mapStateToProps(state) {
-  return {
-    lists: state.lists.lists
-  }
-}
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+    marginTop: 30,
+    marginBottom:30,
+  },
+  paper: {
+    padding: 16,
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  },
+  button: {
+    margin: theme.spacing.unit,
+    position: 'absolute',
+    bottom: '8.33%',
+    right: '8.33%',
+  },
+})
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(ListsActions, dispatch)
-}
-
-@connect(mapStateToProps, mapDispatchToProps)
-@DragDropContext(HTML5Backend)
-export default class Board extends Component {
+class Board extends Component {
   static propTypes = {
-    getLists: PropTypes.func.isRequired,
     moveCard: PropTypes.func.isRequired,
     moveList: PropTypes.func.isRequired,
-    lists: PropTypes.array.isRequired,
   }
 
   constructor(props) {
@@ -43,7 +53,13 @@ export default class Board extends Component {
   }
 
   componentWillMount() {
-    this.props.getLists(10)
+    //this.props.getLists(10)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.location.key !== nextProps.location.key) {
+      this.props.getLists.refetch()
+    }
   }
 
   startScrolling(direction) {
@@ -89,7 +105,7 @@ export default class Board extends Component {
   }
 
   findList(id) {
-    const { lists } = this.props
+    const { lists } = this.props.getLists
     const list = lists.filter(l => l.id === id)[0]
 
     return {
@@ -99,12 +115,22 @@ export default class Board extends Component {
   }
 
   render() {
-    const { lists } = this.props
+    const { classes, boardId, getLists } = this.props
+
+    console.log(`board from state: ${boardId}`)
+    if (getLists.loading) {
+      return (
+        <div className='flex w-100 h-100 items-center justify-center pt7'>
+          <div>Loading (from {process.env.REACT_APP_GRAPHQL_ENDPOINT})</div>
+        </div>
+      )
+    }
 
     return (
       <div style={{ height: '100%' }}>
+        <h1>{getLists.title}</h1>
         <CustomDragLayer snapToGrid={false} />
-        {lists.map((item, i) =>
+        {getLists.lists && getLists.lists.map((item, i) =>
           <CardsContainer
             key={item.id}
             id={item.id}
@@ -117,7 +143,60 @@ export default class Board extends Component {
             x={i}
           />
         )}
+        <Button variant='fab' color='primary' aria-label='add' className={classes.button}>
+          <AddIcon />
+        </Button>
       </div>
     )
   }
 }
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    boardId: ownProps.match.params.id,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(ListsActions, dispatch)
+}
+
+const reduxWrapper = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)
+
+const FEED_QUERY = gql`
+  query getLists($id: ID, $orderBy: String){
+    boardDetails(boardId: $id){
+      title
+      lists(orderBy: $orderBy) {
+        id
+        title
+        cardPositionIndexes
+        cards {
+          title
+          id
+        }
+      }
+    }
+}
+`
+const gqlWrapper = graphql(FEED_QUERY, {
+  name: 'getLists', // name of the injected prop: this.props.getLists...
+  options: (ownProps) => ({
+    variables: {
+      boardId: ownProps.boardId,
+      orderBy: 'positionIndex_ASC'
+    }
+  }),
+})
+
+const ddContext = DragDropContext(HTML5Backend)
+
+// `compose` makes wrapping component much easier and cleaner
+export default compose(
+  reduxWrapper,
+  gqlWrapper,
+  ddContext,
+)(withStyles(styles)(Board))

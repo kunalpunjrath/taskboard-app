@@ -79,7 +79,7 @@ class Dashboard extends React.Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    userId: state.userId 
+    userId: state.users.userId 
   }
 }
 

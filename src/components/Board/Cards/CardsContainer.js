@@ -1,8 +1,45 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { DropTarget, DragSource } from 'react-dnd'
+import { compose } from 'react-apollo'
 
 import Cards from './Cards'
+
+class CardsContainer extends Component {
+  static propTypes = {
+    connectDropTarget: PropTypes.func.isRequired,
+    connectDragSource: PropTypes.func.isRequired,
+    item: PropTypes.object,
+    x: PropTypes.number,
+    moveCard: PropTypes.func.isRequired,
+    moveList: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool,
+    startScrolling: PropTypes.func,
+    stopScrolling: PropTypes.func,
+    isScrolling: PropTypes.bool
+  }
+
+  render() {
+    const { connectDropTarget, connectDragSource, item, x, moveCard, isDragging } = this.props
+    const opacity = isDragging ? 0.5 : 1
+
+    return connectDragSource(connectDropTarget(
+      <div className='desk' style={{ opacity }}>
+        <div className='desk-head'>
+          <div className='desk-name'>{item.name}</div>
+        </div>
+        <Cards
+          moveCard={moveCard}
+          x={x}
+          cards={item.cards}
+          startScrolling={this.props.startScrolling}
+          stopScrolling={this.props.stopScrolling}
+          isScrolling={this.props.isScrolling}
+        />
+      </div>
+    ))
+  }
+}
 
 const listSource = {
   beginDrag(props) {
@@ -42,45 +79,18 @@ const listTarget = {
   }
 }
 
-@DropTarget('list', listTarget, connectDragSource => ({
+const dropTarget = DropTarget('list', listTarget, connectDragSource => ({
   connectDropTarget: connectDragSource.dropTarget(),
 }))
-@DragSource('list', listSource, (connectDragSource, monitor) => ({
+
+const dragSource = DragSource('list', listSource, (connectDragSource, monitor) => ({
   connectDragSource: connectDragSource.dragSource(),
   isDragging: monitor.isDragging()
 }))
-export default class CardsContainer extends Component {
-  static propTypes = {
-    connectDropTarget: PropTypes.func.isRequired,
-    connectDragSource: PropTypes.func.isRequired,
-    item: PropTypes.object,
-    x: PropTypes.number,
-    moveCard: PropTypes.func.isRequired,
-    moveList: PropTypes.func.isRequired,
-    isDragging: PropTypes.bool,
-    startScrolling: PropTypes.func,
-    stopScrolling: PropTypes.func,
-    isScrolling: PropTypes.bool
-  }
 
-  render() {
-    const { connectDropTarget, connectDragSource, item, x, moveCard, isDragging } = this.props
-    const opacity = isDragging ? 0.5 : 1
 
-    return connectDragSource(connectDropTarget(
-      <div className='desk' style={{ opacity }}>
-        <div className='desk-head'>
-          <div className='desk-name'>{item.name}</div>
-        </div>
-        <Cards
-          moveCard={moveCard}
-          x={x}
-          cards={item.cards}
-          startScrolling={this.props.startScrolling}
-          stopScrolling={this.props.stopScrolling}
-          isScrolling={this.props.isScrolling}
-        />
-      </div>
-    ))
-  }
-}
+// `compose` makes wrapping component much easier and cleaner
+export default compose(
+  dropTarget,
+  dragSource
+)(CardsContainer)

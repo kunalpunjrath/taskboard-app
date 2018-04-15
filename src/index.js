@@ -8,7 +8,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-import reducers  from './reducers'
+import rootReducer  from './reducers'
 
 import App from './components/App'
 
@@ -22,12 +22,15 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 })
 
-const store = createStore(reducers)
+const store = createStore(
+  rootReducer, 
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
 
 ReactDOM.render(
   <ApolloProvider client={client}>
     <Provider store={store}>
-      <App />
+      <App/>
     </Provider>
   </ApolloProvider>,
   document.getElementById('root'),

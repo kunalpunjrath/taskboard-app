@@ -5,11 +5,39 @@ import { DragSource } from 'react-dnd'
 import { getEmptyImage } from 'react-dnd-html5-backend'
 
 import Card from './Card'
-
+import { compose } from 'react-apollo'
 
 function getStyles(isDragging) {
   return {
     display: isDragging ? 0.5 : 1
+  }
+}
+
+class CardComponent extends Component {
+  static propTypes = {
+    item: PropTypes.object,
+    connectDragSource: PropTypes.func.isRequired,
+    connectDragPreview: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool.isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number,
+    stopScrolling: PropTypes.func
+  }
+
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      captureDraggingState: true
+    })
+  }
+
+  render() {
+    const { isDragging, connectDragSource, item } = this.props
+
+    return connectDragSource(
+      <div>
+        <Card style={getStyles(isDragging)} item={item} />
+      </div>
+    )
   }
 }
 
@@ -56,31 +84,9 @@ function collectDragSource(connectDragSource, monitor) {
   }
 }
 
-@DragSource('card', cardSource, collectDragSource, OPTIONS)
-export default class CardComponent extends Component {
-  static propTypes = {
-    item: PropTypes.object,
-    connectDragSource: PropTypes.func.isRequired,
-    connectDragPreview: PropTypes.func.isRequired,
-    isDragging: PropTypes.bool.isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number,
-    stopScrolling: PropTypes.func
-  }
+const dragSource = DragSource('card', cardSource, collectDragSource, OPTIONS)
 
-  componentDidMount() {
-    this.props.connectDragPreview(getEmptyImage(), {
-      captureDraggingState: true
-    })
-  }
-
-  render() {
-    const { isDragging, connectDragSource, item } = this.props
-
-    return connectDragSource(
-      <div>
-        <Card style={getStyles(isDragging)} item={item} />
-      </div>
-    )
-  }
-}
+// `compose` makes wrapping component much easier and cleaner
+export default compose(
+  dragSource
+)(CardComponent)

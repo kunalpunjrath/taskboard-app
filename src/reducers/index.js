@@ -1,9 +1,13 @@
-// import { combineReducers } from 'redux'
-// import todos from './todos'
-// import visibilityFilter from './visibilityFilter'
+import { combineReducers } from 'redux'
+import {
+  routerReducer
+} from 'react-router-redux'
+
+import lists from './lists'
+
 const userId = 'cjdaeil5len6w0144b44lgqk9'
 
-const reducers = (state = {userId}, action) => {
+const users = (state = {userId}, action) => {
  /*  switch (action.type) {
     case 'ADD_CARD':
       return {
@@ -20,4 +24,10 @@ const reducers = (state = {userId}, action) => {
   return state
 }
 
-export default reducers
+const rootReducer = combineReducers({
+  routing: routerReducer,
+  users,
+  lists,
+})
+
+export default rootReducer

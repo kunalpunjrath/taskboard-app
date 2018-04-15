@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import {
-  NavLink,
-  Link,
   BrowserRouter as Router,
   Route,
   Switch,
@@ -18,6 +16,7 @@ import { withStyles } from 'material-ui/styles'
 import AppBar from 'material-ui/AppBar'
 import Toolbar from 'material-ui/Toolbar'
 import Typography from 'material-ui/Typography'
+import Board from './Board/Board'
 
 const styles = {
   root: {
@@ -31,39 +30,6 @@ class App extends Component {
     return (
       <Router>
         <Fragment>
-        {/* <nav className='pa3 pa4-ns'>
-            <Link
-            className='link dim black b f6 f5-ns dib mr3'
-            to='/'
-            title='Feed'
-            >
-            Blog
-            </Link>
-            <NavLink
-            className='link dim f6 f5-ns dib mr3 black'
-            activeClassName='gray'
-            exact={true}
-            to='/'
-            title='Feed'
-            >
-            Feed
-            </NavLink>
-            <NavLink
-            className='link dim f6 f5-ns dib mr3 black'
-            activeClassName='gray'
-            exact={true}
-            to='/drafts'
-            title='Drafts'
-            >
-            Drafts
-            </NavLink>
-            <Link
-            to='/create'
-            className='f6 link dim br1 ba ph3 pv2 fr mb2 dib black'
-            >
-            + Create Draft
-            </Link>
-        </nav> */}
         <div className={classes.root}>
           <AppBar position='static'>
             <Toolbar>
@@ -78,7 +44,7 @@ class App extends Component {
               <Route exact path='/' component={Dashboard} />
               {/* <Route path='/drafts' component={DraftsPage} /> */}
               {/* <Route path='/create' component={CreatePage} /> */}
-              {/* <Route path='/board/:id' component={DetailPage} /> */}
+              <Route path='/board/:id' component={Board} />
             </Switch>
         </div>
         </Fragment>
